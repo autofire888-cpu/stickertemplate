@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>QR Sticker Builder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+      padding: 24px;
+      font-size: 18px;
+      background: #fff;
+    }
+
+    h3 {
+      font-size: 22px;
+      margin-top: 32px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      font-size: 16px;
+      color: #555;
+      margin-top: 0;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      font-size: 18px;
+      padding: 14px;
+      margin: 12px 0;
+    }
+
+    textarea {
+      min-height: 120px;
+    }
+
+    canvas {
+      width: 100%;
+      max-width: 420px;
+      border: 1px solid #ddd;
+      margin-bottom: 24px;
+      display: block;
+    }
+
+    button {
+      background: #007aff;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:active {
+      opacity: 0.85;
+    }
+  </style>
+</head>
+
+<body>
+
+<h3>Upload Logo</h3>
+<p>อัปโหลดโลโก้ร้านค้าของคุณ</p>
+<input type="file" id="logoInput" accept="image/*" />
+
+<h3>Upload QR Code</h3>
+<p>อัปโหลดโค้ด QR ของคุณ</p>
+<input type="file" id="qrInput" accept="image/*" />
+
+<h3>Thai Version Preview</h3>
+<canvas id="previewTH" width="1200" height="1600"></canvas>
+
+<h3>English Version Preview</h3>
+<canvas id="previewEN" width="1200" height="1600"></canvas>
+
+<h3>Delivery Address</h3>
+<p>กรอกที่อยู่จัดส่ง (ภาษาไทยหรืออังกฤษ)</p>
+<textarea id="address" placeholder="Shipping address"></textarea>
+
+<button id="submit">Submit / ส่ง!</button>
+
+<script src="/sticker.js"></script>
+<script>
+document.getElementById("submit").onclick = async () => {
+  const logoFile = document.getElementById("logoInput").files[0];
+  const qrFile = document.getElementById("qrInput").files[0];
+  const address = document.getElementById("address").value;
+
+  if (!logoFile || !qrFile || !address) {
+    alert("กรุณากรอกข้อมูลให้ครบ / Please complete all fields");
+    return;
+  }
+
+  const form = new FormData();
+
+  // 🔴 Carrd側で取得した email をここに渡す
+  // 方法例：URLパラメータ ?email=
+  const params = new URLSearchParams(window.location.search);
+  const email = params.get("email") || "";
+
+  form.append("email", email);
+  form.append("logo", logoFile);
+  form.append("qr", qrFile);
+  form.append("address", address);
+
+  await fetch("https://api.autofire.review/create-sticker", {
+    method: "POST",
+    body: form
+  });
+
+  alert("✅ ส่งข้อมูลเรียบร้อยแล้ว!\nStickers will arrive in 3–4 days.");
+};
+</script>
+
+</body>
+</html>
